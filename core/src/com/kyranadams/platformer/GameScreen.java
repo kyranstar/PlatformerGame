@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.input.GestureDetector;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 
 public abstract class GameScreen extends AbstractScreen implements GestureDetector.GestureListener {
 
@@ -16,15 +17,14 @@ public abstract class GameScreen extends AbstractScreen implements GestureDetect
     protected static final int SCREEN_HEIGHT = 640;
     private static final boolean DISPLAY_FPS = true;
 
-    protected OrthographicCamera camera;
     private SpriteBatch batch;
     private SpriteBatch hudBatch;
     private BitmapFont font;
+    protected Stage stage;
 
 
     public GameScreen(Game game) {
         super(game);
-        camera = new OrthographicCamera(SCREEN_WIDTH, SCREEN_HEIGHT);
     }
 
     @Override
@@ -44,7 +44,7 @@ public abstract class GameScreen extends AbstractScreen implements GestureDetect
         Gdx.gl.glClearColor(0.1f, 0.1f, 0.1f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        batch.setProjectionMatrix(camera.combined);
+        batch.setProjectionMatrix(stage.getCamera().projection);
         batch.begin();
         renderScene(batch);
         batch.end();

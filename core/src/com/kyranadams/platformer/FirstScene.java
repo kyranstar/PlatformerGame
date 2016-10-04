@@ -17,7 +17,6 @@ public class FirstScene extends GameScreen {
     private static final int SCROLL_SPEED = 5;
     TiledMap tiledMap;
     TiledMapRenderer tiledMapRenderer;
-    Stage stage;
     ControllableCharacter mainCharacter = new ControllableCharacter("badlogic.jpg");
 
     public FirstScene(Game game) {
@@ -40,8 +39,28 @@ public class FirstScene extends GameScreen {
                 mainCharacter.moveBy(-SCROLL_SPEED, 0);
             }
             stage.getCamera().position.set(mainCharacter.getX(), mainCharacter.getY(), 0);
+            float camX = stage.getCamera().position.x;
+            float camY = stage.getCamera().position.y;
+
+            Vector2 camMin = new Vector2(0, 0);
+            camMin.scl(((OrthographicCamera)stage.getCamera()).zoom / 2); //bring to center and scale by the zoom level
+            Vector2 camMax = new Vector2(tileMapWidthPixels(), tileMapHeightPixels());
+            camMax.sub(camMin); //bring to center
+
+            //keep camera within borders
+            camX = Math.min(camMax.x, Math.max(camX, camMin.x));
+            camY = Math.min(camMax.y, Math.max(camY, camMin.y));
+
+            stage.getCamera().position.set(camX, camY, stage.getCamera().position.z);
             stage.getCamera().update();
         }
+    }
+
+    private int tileMapWidthPixels(){
+        return tiledMap.getProperties().get("width", Integer.class) * tiledMap.getProperties().get("tilewidth", Integer.class);
+    }
+    private int tileMapHeightPixels(){
+        return tiledMap.getProperties().get("height", Integer.class) * tiledMap.getProperties().get("tileheight", Integer.class);
     }
 
     @Override
