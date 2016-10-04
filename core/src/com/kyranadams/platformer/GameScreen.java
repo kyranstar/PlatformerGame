@@ -12,8 +12,8 @@ import com.badlogic.gdx.input.GestureDetector;
 
 public abstract class GameScreen extends AbstractScreen implements GestureDetector.GestureListener {
 
-    private static final int SCREEN_WIDTH = 960;
-    private static final int SCREEN_HEIGHT = 640;
+    protected static final int SCREEN_WIDTH = 960;
+    protected static final int SCREEN_HEIGHT = 640;
     private static final boolean DISPLAY_FPS = true;
 
     protected OrthographicCamera camera;
@@ -39,27 +39,31 @@ public abstract class GameScreen extends AbstractScreen implements GestureDetect
 
     @Override
     public void render(float delta) {
+        update(delta);
+
         Gdx.gl.glClearColor(0.1f, 0.1f, 0.1f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
-        renderScene(batch, delta);
+        renderScene(batch);
         batch.end();
 
 
         hudBatch.getProjectionMatrix().setToOrtho2D(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
         hudBatch.begin();
-        renderHud(hudBatch, delta);
+        renderHud(hudBatch);
         if (DISPLAY_FPS) {
             font.draw(hudBatch, String.valueOf(Gdx.graphics.getFramesPerSecond()), 0, SCREEN_HEIGHT);
         }
         hudBatch.end();
     }
 
-    protected abstract void renderScene(SpriteBatch batch, float delta);
+    protected abstract void update(float delta);
 
-    protected abstract void renderHud(SpriteBatch hudBatch, float delta);
+    protected abstract void renderScene(SpriteBatch batch);
+
+    protected abstract void renderHud(SpriteBatch hudBatch);
 
     @Override
     public void hide() {

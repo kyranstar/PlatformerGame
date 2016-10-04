@@ -11,8 +11,8 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 public class MainMenuScreen extends AbstractScreen {
 
-    private static final int SCREEN_WIDTH = 960;
-    private static final int SCREEN_HEIGHT = 640;
+    private static final int SCREEN_WIDTH = 640;
+    private static final int SCREEN_HEIGHT = 960;
     SpriteBatch batch;
     GlyphLayout glyphLayout;
     private BitmapFont font;
