@@ -24,8 +24,7 @@ public class FirstScene extends GameScreen {
         tiledMap = new TmxMapLoader().load("sceneOneMap.tmx");
         tiledMapRenderer = new OrthogonalTiledMapRenderer(tiledMap);
         stage = new Stage(new StretchViewport(SCREEN_WIDTH, SCREEN_HEIGHT));
-        stage.getViewport().setCamera(new OrthographicCamera(SCREEN_WIDTH, SCREEN_HEIGHT));
-        mainCharacter.setPosition(SCREEN_WIDTH / 2, SCREEN_HEIGHT);
+        mainCharacter.setPosition(0, 0);
         stage.addActor(mainCharacter);
     }
 
@@ -34,26 +33,25 @@ public class FirstScene extends GameScreen {
         stage.act(delta);
         if (Gdx.input.isTouched()) {
             if (Gdx.input.getX() > SCREEN_WIDTH / 2) {
-                mainCharacter.moveBy(SCROLL_SPEED, 0);
+                mainCharacter.moveBy(SCROLL_SPEED, 1);
             } else {
-                mainCharacter.moveBy(-SCROLL_SPEED, 0);
+                mainCharacter.moveBy(-SCROLL_SPEED, -1);
             }
-            stage.getCamera().position.set(mainCharacter.getX(), mainCharacter.getY(), 0);
-            float camX = stage.getCamera().position.x;
-            float camY = stage.getCamera().position.y;
 
-            Vector2 camMin = new Vector2(0, 0);
-            camMin.scl(((OrthographicCamera)stage.getCamera()).zoom / 2); //bring to center and scale by the zoom level
-            Vector2 camMax = new Vector2(tileMapWidthPixels(), tileMapHeightPixels());
-            camMax.sub(camMin); //bring to center
-
-            //keep camera within borders
-            camX = Math.min(camMax.x, Math.max(camX, camMin.x));
-            camY = Math.min(camMax.y, Math.max(camY, camMin.y));
-
-            stage.getCamera().position.set(camX, camY, stage.getCamera().position.z);
-            stage.getCamera().update();
         }
+        stage.getCamera().position.set(mainCharacter.getX(), mainCharacter.getY(), 0);
+        float camX = stage.getCamera().position.x;
+        float camY = stage.getCamera().position.y;
+
+        Vector2 camMin = new Vector2(stage.getCamera().viewportWidth / 2, stage.getCamera().viewportHeight / 2);
+        Vector2 camMax = new Vector2(tileMapWidthPixels() - stage.getCamera().viewportWidth / 2, tileMapHeightPixels() - stage.getCamera().viewportHeight / 2);
+
+        //keep camera within borders
+        camX = Math.min(camMax.x, Math.max(camX, camMin.x));
+        camY = Math.min(camMax.y, Math.max(camY, camMin.y));
+
+        stage.getCamera().position.set(camX, camY, stage.getCamera().position.z);
+        stage.getCamera().update();
     }
 
     private int tileMapWidthPixels(){
