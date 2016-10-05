@@ -16,11 +16,12 @@ import com.badlogic.gdx.utils.viewport.StretchViewport;
 
 
 public class FirstScene extends GameScreen {
-    private static final int SCROLL_SPEED = 5;
+    private static final int SCROLL_SPEED = 100;
     private TiledMap tiledMap;
     private TiledMapRenderer tiledMapRenderer;
     private ControllableCharacter mainCharacter = new ControllableCharacter("george.png");
     private static final int[] RENDERED_LAYERS = new int[]{0};
+    private static final float FRICTION = 0.0001f;
 
     public FirstScene(Game game) {
         super(game);
@@ -47,14 +48,16 @@ public class FirstScene extends GameScreen {
 
             // if right hand side, move right
             if (touch.x > stage.getCamera().viewportWidth / 2) {
-                mainCharacter.moveBy(SCROLL_SPEED, 0);
+                mainCharacter.velocity = new Vector2(SCROLL_SPEED, 0);
             } else {
-                mainCharacter.moveBy(-SCROLL_SPEED, 0);
+                mainCharacter.velocity = new Vector2(-SCROLL_SPEED, 0);
             }
 
         }
+        mainCharacter.update(delta);
+        // apply friction
+        mainCharacter.velocity.scl((float) Math.pow(FRICTION, delta));
         updateCamera(delta);
-
     }
 
     private void updateCamera(float delta) {
