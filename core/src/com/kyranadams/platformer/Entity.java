@@ -4,6 +4,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
@@ -13,6 +15,7 @@ public class Entity extends Actor {
     protected Vector2 velocity;
     protected Sprite sprite;
     private Texture tex;
+    private static final float FRICTION = 0.0001f;
 
     public Entity(String img) {
         this.tex = new Texture(Gdx.files.internal(img));
@@ -26,8 +29,33 @@ public class Entity extends Actor {
         this.velocity.add(v.x, v.y);
     }
 
-    public void update(float delta) {
+    public void update(float delta, TiledMapTileLayer collisionLayer) {
+        Vector2 oldPosition = new Vector2(getX(), getY());
         this.moveBy(velocity.x * delta, velocity.y * delta);
+
+        this.moveBy(velocity.x * delta, 0);
+        if (tilemapCollision(collisionLayer, sprite.getBoundingRectangle())) {
+            setPosition(oldPosition.x, oldPosition.y);
+            velocity.x = 0;
+        }
+
+        oldPosition = new Vector2(getX(), getY());
+        this.moveBy(0, velocity.y * delta);
+        if (tilemapCollision(collisionLayer, sprite.getBoundingRectangle())) {
+            setPosition(oldPosition.x, oldPosition.y);
+            velocity.y = 0;
+        }
+
+        // apply friction
+        velocity.scl((float) Math.pow(FRICTION, delta));
+    }
+
+    private boolean tilemapCollision(TiledMapTileLayer collisionLayer, Rectangle box) {
+        return false;
+    }
+
+    private boolean isTileSolid(TiledMapTileLayer collisionLayer, float x, float y) {
+        return collisionLayer.getCell((int) (x / collisionLayer.getTileWidth()), (int) (y / collisionLayer.getTileHeight())) != null;
     }
 
     @Override

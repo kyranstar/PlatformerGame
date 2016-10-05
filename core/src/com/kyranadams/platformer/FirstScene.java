@@ -22,7 +22,6 @@ public class FirstScene extends GameScreen {
     private TiledMapRenderer tiledMapRenderer;
     private ControllableCharacter mainCharacter = new ControllableCharacter("george.png");
     private static final int[] RENDERED_LAYERS = new int[]{0};
-    private static final float FRICTION = 0.0001f;
     // tilemap size in tiles
     private final int TILEMAP_WIDTH;
     private final int TILEMAP_HEIGHT;
@@ -61,7 +60,7 @@ public class FirstScene extends GameScreen {
             // scale input to viewport
             Vector3 touch = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
             stage.getCamera().unproject(touch);
-
+            System.out.println(touch);
             // if right hand side, move right
             if (touch.x > stage.getCamera().viewportWidth / 2) {
                 mainCharacter.velocity = new Vector2(SCROLL_SPEED, 0);
@@ -70,14 +69,8 @@ public class FirstScene extends GameScreen {
             }
 
         }
-        mainCharacter.update(delta);
-        // apply friction
-        mainCharacter.velocity.scl((float) Math.pow(FRICTION, delta));
+        mainCharacter.update(delta, collisionLayer);
         updateCamera(delta);
-    }
-
-    private boolean isTileSolid(float x, float y) {
-        return collisionLayer.getCell((int) (x / TILE_WIDTH), (int) (y / TILE_HEIGHT)) != null;
     }
 
     private void updateCamera(float delta) {
