@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapRenderer;
+import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Vector2;
@@ -22,6 +23,14 @@ public class FirstScene extends GameScreen {
     private ControllableCharacter mainCharacter = new ControllableCharacter("george.png");
     private static final int[] RENDERED_LAYERS = new int[]{0};
     private static final float FRICTION = 0.0001f;
+    // tilemap size in tiles
+    private final int TILEMAP_WIDTH;
+    private final int TILEMAP_HEIGHT;
+    // tile size in pixels
+    private final int TILE_WIDTH;
+    private final int TILE_HEIGHT;
+
+    private TiledMapTileLayer collisionLayer;
 
     public FirstScene(Game game) {
         super(game);
@@ -32,6 +41,13 @@ public class FirstScene extends GameScreen {
         // load character position
         Vector2 characterStartPos = ((RectangleMapObject) tiledMap.getLayers().get("Entities").getObjects().get("George")).getRectangle().getPosition(new Vector2());
         mainCharacter.setPosition(characterStartPos.x, characterStartPos.y);
+
+        TILEMAP_WIDTH = tiledMap.getProperties().get("width", Integer.class);
+        TILEMAP_HEIGHT = tiledMap.getProperties().get("height", Integer.class);
+        TILE_WIDTH = tiledMap.getProperties().get("tilewidth", Integer.class);
+        TILE_HEIGHT = tiledMap.getProperties().get("tileheight", Integer.class);
+
+        collisionLayer = ((TiledMapTileLayer) tiledMap.getLayers().get("Collisions"));
 
         // create stage
         stage = new Stage(new StretchViewport(SCREEN_WIDTH, SCREEN_HEIGHT));
@@ -60,13 +76,17 @@ public class FirstScene extends GameScreen {
         updateCamera(delta);
     }
 
+    private boolean isTileSolid(float x, float y) {
+        return collisionLayer.getCell((int) (x / TILE_WIDTH), (int) (y / TILE_HEIGHT)) != null;
+    }
+
     private void updateCamera(float delta) {
         // camera follows player
         stage.getCamera().position.set(mainCharacter.getX(), mainCharacter.getY(), 0);
 
         // Camera borders
         Vector2 camMin = new Vector2(stage.getCamera().viewportWidth / 2, stage.getCamera().viewportHeight / 2);
-        Vector2 camMax = new Vector2(tileMapWidthPixels() - stage.getCamera().viewportWidth / 2, tileMapHeightPixels() - stage.getCamera().viewportHeight / 2);
+        Vector2 camMax = new Vector2(TILEMAP_WIDTH * TILE_WIDTH - stage.getCamera().viewportWidth / 2, TILEMAP_HEIGHT * TILE_HEIGHT - stage.getCamera().viewportHeight / 2);
 
         float camX = stage.getCamera().position.x;
         float camY = stage.getCamera().position.y;
@@ -76,14 +96,6 @@ public class FirstScene extends GameScreen {
 
         stage.getCamera().position.set(camX, camY, stage.getCamera().position.z);
         stage.getCamera().update();
-    }
-
-    private int tileMapWidthPixels() {
-        return tiledMap.getProperties().get("width", Integer.class) * tiledMap.getProperties().get("tilewidth", Integer.class);
-    }
-
-    private int tileMapHeightPixels() {
-        return tiledMap.getProperties().get("height", Integer.class) * tiledMap.getProperties().get("tileheight", Integer.class);
     }
 
     @Override
