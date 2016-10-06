@@ -5,12 +5,14 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapRenderer;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -57,6 +59,13 @@ public class FirstScene extends GameScreen {
         // create stage
         stage = new Stage(new StretchViewport(SCREEN_WIDTH, SCREEN_HEIGHT));
         stage.addActor(mainCharacter);
+
+        for (MapObject object : tiledMap.getLayers().get("Objects").getObjects()) {
+            Entity ent = new Entity(object.getName());
+            Rectangle rect = ((RectangleMapObject) object).getRectangle();
+            ent.setPosition(rect.getX(), rect.getY());
+            stage.addActor(ent);
+        }
     }
 
     @Override
