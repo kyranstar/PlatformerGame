@@ -24,7 +24,7 @@ public class ParallaxBackground {
     }
     public void move(Vector2 amount){
         Vector2 scaledMove = amount.scl(speed);
-        sprite.translate(scaledMove.x, scaledMove.y);
+        sprite.translate(-scaledMove.x, -scaledMove.y);
     }
 
     public void dispose(){

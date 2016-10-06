@@ -2,6 +2,7 @@ package com.kyranadams.platformer;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
@@ -51,6 +52,8 @@ public class FirstScene extends GameScreen {
 
         collisionLayer = ((TiledMapTileLayer) tiledMap.getLayers().get("Collisions"));
 
+        this.background = new ParallaxBackground(new Vector2(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2), "space.jpg", .1f);
+
         // create stage
         stage = new Stage(new StretchViewport(SCREEN_WIDTH, SCREEN_HEIGHT));
         stage.addActor(mainCharacter);
@@ -79,6 +82,7 @@ public class FirstScene extends GameScreen {
         updateCamera(delta);
 
         background.move(new Vector2(stage.getCamera().position.x, stage.getCamera().position.y).sub(oldCamera));
+        System.out.println(background.sprite.getX() + ", " + background.sprite.getY());
     }
 
     private void updateCamera(float delta) {
@@ -102,19 +106,38 @@ public class FirstScene extends GameScreen {
     @Override
     public void dispose() {
         mainCharacter.dispose();
+        background.dispose();
     }
 
-    @Override
     protected void renderScene(SpriteBatch batch) {
-        background.render(batch);
         tiledMapRenderer.setView((OrthographicCamera) stage.getCamera());
         tiledMapRenderer.render(RENDERED_LAYERS);
         stage.draw();
     }
 
-    @Override
-    protected void renderHud(SpriteBatch hudBatch) {
+    protected void renderHud(SpriteBatch batch) {
 
+    }
+
+    protected void renderScene(SpriteBatch batch, Camera camera) {
+        batch.getProjectionMatrix().setToOrtho2D(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+        batch.begin();
+        background.render(batch);
+        batch.end();
+
+        batch.setProjectionMatrix(camera.projection);
+        batch.begin();
+        renderScene(batch);
+        batch.end();
+
+
+        batch.getProjectionMatrix().setToOrtho2D(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+        batch.begin();
+        renderHud(batch);
+        if (DISPLAY_FPS) {
+            font.draw(batch, String.valueOf(Gdx.graphics.getFramesPerSecond()), 0, SCREEN_HEIGHT);
+        }
+        batch.end();
     }
 
     @Override
