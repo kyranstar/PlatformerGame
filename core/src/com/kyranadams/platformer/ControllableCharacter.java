@@ -11,7 +11,7 @@ public class ControllableCharacter extends Entity {
     public void draw(Batch batch, float alpha) {
         if (velocity.x < 0) {
             sprite.setFlip(true, false);
-        } else {
+        } else if (velocity.x > 0) {
             sprite.setFlip(false, false);
         }
         sprite.draw(batch);

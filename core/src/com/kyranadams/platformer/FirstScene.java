@@ -18,6 +18,7 @@ import com.badlogic.gdx.utils.viewport.StretchViewport;
 
 public class FirstScene extends GameScreen {
     private static final int SCROLL_SPEED = 100;
+    private static final float GRAVITY = 200;
     private TiledMap tiledMap;
     private TiledMapRenderer tiledMapRenderer;
     private ControllableCharacter mainCharacter = new ControllableCharacter("george.png");
@@ -60,15 +61,16 @@ public class FirstScene extends GameScreen {
             // scale input to viewport
             Vector3 touch = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
             stage.getCamera().unproject(touch);
-            System.out.println(touch);
+
             // if right hand side, move right
             if (touch.x > stage.getCamera().viewportWidth / 2) {
-                mainCharacter.velocity = new Vector2(SCROLL_SPEED, 0);
+                mainCharacter.velocity.x = SCROLL_SPEED;
             } else {
-                mainCharacter.velocity = new Vector2(-SCROLL_SPEED, 0);
+                mainCharacter.velocity.x = -SCROLL_SPEED;
             }
 
         }
+        mainCharacter.velocity.add(0, -GRAVITY * delta);
         mainCharacter.update(delta, collisionLayer);
         updateCamera(delta);
     }

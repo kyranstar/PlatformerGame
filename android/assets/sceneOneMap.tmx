@@ -3,8 +3,8 @@
  <tileset firstgid="1" name="tiles1" tilewidth="80" tileheight="80">
   <image source="tiles1.png" width="320" height="240"/>
  </tileset>
- <tileset firstgid="13" name="meta_tiles" tilewidth="40" tileheight="40">
-  <image source="meta_tiles.png" width="40" height="40"/>
+ <tileset firstgid="13" name="meta_tiles" tilewidth="80" tileheight="80">
+  <image source="meta_tiles.png" width="80" height="80"/>
  </tileset>
  <layer name="Tiles" width="16" height="16">
   <data encoding="csv">

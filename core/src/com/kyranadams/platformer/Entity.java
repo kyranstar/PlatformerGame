@@ -20,6 +20,7 @@ public class Entity extends Actor {
     public Entity(String img) {
         this.tex = new Texture(Gdx.files.internal(img));
         this.sprite = new Sprite(tex);
+
         this.setTouchable(Touchable.enabled);
         this.setBounds(this.sprite.getX(), this.sprite.getY(), this.sprite.getWidth(), this.sprite.getHeight());
         this.velocity = new Vector2();
@@ -31,8 +32,6 @@ public class Entity extends Actor {
 
     public void update(float delta, TiledMapTileLayer collisionLayer) {
         Vector2 oldPosition = new Vector2(getX(), getY());
-        this.moveBy(velocity.x * delta, velocity.y * delta);
-
         this.moveBy(velocity.x * delta, 0);
         if (tilemapCollision(collisionLayer, sprite.getBoundingRectangle())) {
             setPosition(oldPosition.x, oldPosition.y);
@@ -47,15 +46,26 @@ public class Entity extends Actor {
         }
 
         // apply friction
-        velocity.scl((float) Math.pow(FRICTION, delta));
+        velocity.x *= ((float) Math.pow(FRICTION, delta));
     }
 
     private boolean tilemapCollision(TiledMapTileLayer collisionLayer, Rectangle box) {
-        return false;
-    }
+        float tileWidth = collisionLayer.getTileWidth();
+        float tileHeight = collisionLayer.getTileHeight();
+        // get tile of each corner
+        Vector2 bottomLeft = new Vector2(box.getX(), box.getY()).scl(1f / tileWidth, 1f / tileHeight);
+        Vector2 topLeft = new Vector2(box.getX(), box.getY() + box.getHeight()).scl(1f / tileWidth, 1f / tileHeight);
+        Vector2 bottomRight = new Vector2(box.getX() + box.getWidth(), box.getY()).scl(1f / tileWidth, 1f / tileHeight);
 
-    private boolean isTileSolid(TiledMapTileLayer collisionLayer, float x, float y) {
-        return collisionLayer.getCell((int) (x / collisionLayer.getTileWidth()), (int) (y / collisionLayer.getTileHeight())) != null;
+        for (int x = (int) bottomLeft.x; x < bottomRight.x; x++) {
+            for (int y = (int) bottomLeft.y; y < topLeft.y; y++) {
+                // if it's solid
+                if (collisionLayer.getCell(x, y) != null) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     @Override
