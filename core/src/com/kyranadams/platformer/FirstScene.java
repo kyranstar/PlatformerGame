@@ -19,6 +19,8 @@ import com.badlogic.gdx.utils.viewport.StretchViewport;
 public class FirstScene extends GameScreen {
     private static final int SCROLL_SPEED = 100;
     private static final float GRAVITY = 200;
+
+    private ParallaxBackground background;
     private TiledMap tiledMap;
     private TiledMapRenderer tiledMapRenderer;
     private ControllableCharacter mainCharacter = new ControllableCharacter("george.png");
@@ -56,6 +58,8 @@ public class FirstScene extends GameScreen {
 
     @Override
     protected void update(float delta) {
+        Vector2 oldCamera = new Vector2(stage.getCamera().position.x, stage.getCamera().position.y);
+
         stage.act(delta);
         if (Gdx.input.isTouched()) {
             // scale input to viewport
@@ -73,6 +77,8 @@ public class FirstScene extends GameScreen {
         mainCharacter.velocity.add(0, -GRAVITY * delta);
         mainCharacter.update(delta, collisionLayer);
         updateCamera(delta);
+
+        background.move(new Vector2(stage.getCamera().position.x, stage.getCamera().position.y).sub(oldCamera));
     }
 
     private void updateCamera(float delta) {
@@ -100,6 +106,7 @@ public class FirstScene extends GameScreen {
 
     @Override
     protected void renderScene(SpriteBatch batch) {
+        background.render(batch);
         tiledMapRenderer.setView((OrthographicCamera) stage.getCamera());
         tiledMapRenderer.render(RENDERED_LAYERS);
         stage.draw();
