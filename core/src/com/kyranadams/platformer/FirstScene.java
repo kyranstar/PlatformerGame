@@ -54,7 +54,7 @@ public class FirstScene extends GameScreen {
 
         collisionLayer = ((TiledMapTileLayer) tiledMap.getLayers().get("Collisions"));
 
-        this.background = new ParallaxBackground(new Vector2(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2), "space.jpg", .1f);
+        this.background = new ParallaxBackground(new Vector2(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2), "space.jpg", .35f);
 
         // create stage
         stage = new Stage(new StretchViewport(SCREEN_WIDTH, SCREEN_HEIGHT));
@@ -91,7 +91,6 @@ public class FirstScene extends GameScreen {
         updateCamera(delta);
 
         background.move(new Vector2(stage.getCamera().position.x, stage.getCamera().position.y).sub(oldCamera));
-        System.out.println(background.sprite.getX() + ", " + background.sprite.getY());
     }
 
     private void updateCamera(float delta) {
