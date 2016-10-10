@@ -16,7 +16,7 @@ android {
     }
     defaultConfig {
         applicationId "com.kyranadams.platformer"
-        minSdkVersion 8
+        minSdkVersion 1
         targetSdkVersion 24
     }
 }

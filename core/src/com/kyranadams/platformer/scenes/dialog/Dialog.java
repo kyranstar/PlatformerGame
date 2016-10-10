@@ -6,8 +6,9 @@ import com.badlogic.gdx.scenes.scene2d.Action;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
-import com.kyranadams.platformer.Entity;
+import com.kyranadams.platformer.scenes.entity.Entity;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,13 +53,34 @@ public class Dialog {
 
         public Parameters update(List<DialogTokenizer.DialogToken> parameterList) {
             Map<String, String> newParameters = new HashMap<String, String>(parameters);
-//            for (DialogTokenizer.DialogToken p : parameterList) {
-//                if (!p.contains("=")) {
-//                    continue;
-//                }
-//                String[] k = p.split("=");
-//                newParameters.put(k[0].toLowerCase().trim(), k[1].toLowerCase().trim());
-//            }
+
+            List<DialogTokenizer.DialogToken> tokensToComma = new ArrayList<DialogTokenizer.DialogToken>();
+            for (int i = 0; i < parameterList.size(); i++) {
+                DialogTokenizer.DialogToken p = parameterList.get(i);
+                if (p.type == DialogTokenizer.DialogTokenType.COMMA || i == parameterList.size() - 1) {
+                    int equalsIndex = -1;
+                    for(int j = 0; j < tokensToComma.size(); j++){
+                        if(tokensToComma.get(j).type == DialogTokenizer.DialogTokenType.EQUALS){
+                            equalsIndex = j;
+                            break;
+                        }
+                    }
+                    if(equalsIndex != -1){
+                        if(equalsIndex != 1){
+                            throw new RuntimeException("Can only have one argument left of =");
+                        }
+                        if(tokensToComma.size() != 3){
+                            throw new RuntimeException("Can only have one argument right of =");
+                        }
+                        String varName = tokensToComma.get(0).string;
+                        String paramName = tokensToComma.get(2).string;
+                        newParameters.put(varName.toLowerCase().trim(), paramName.toLowerCase().trim());
+                    }
+                    tokensToComma = new ArrayList<DialogTokenizer.DialogToken>();
+                } else {
+                    tokensToComma.add(p);
+                }
+            }
             Parameters copy = new Parameters();
             copy.parameters = newParameters;
             return copy;
