@@ -1,4 +1,4 @@
-package com.kyranadams.platformer;
+package com.kyranadams.platformer.scenes.entity;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
@@ -24,6 +24,14 @@ public class Entity extends Actor {
         this.setTouchable(Touchable.enabled);
         this.setBounds(this.sprite.getX(), this.sprite.getY(), this.sprite.getWidth(), this.sprite.getHeight());
         this.velocity = new Vector2();
+    }
+
+    public Vector2 getVelocity() {
+        return velocity;
+    }
+
+    public void setVelocity(Vector2 velocity) {
+        this.velocity = velocity;
     }
 
     public void addVelocity(Vector2 v) {

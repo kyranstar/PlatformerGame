@@ -1,4 +1,4 @@
-package com.kyranadams.platformer;
+package com.kyranadams.platformer.scenes;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
@@ -17,6 +17,11 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
+import com.kyranadams.platformer.GameScreen;
+import com.kyranadams.platformer.ParallaxBackground;
+import com.kyranadams.platformer.scenes.dialog.Dialog;
+import com.kyranadams.platformer.scenes.entity.ControllableCharacter;
+import com.kyranadams.platformer.scenes.entity.Entity;
 
 
 public class FirstScene extends GameScreen {
@@ -34,6 +39,8 @@ public class FirstScene extends GameScreen {
     // tile size in pixels
     private final int TILE_WIDTH;
     private final int TILE_HEIGHT;
+
+    private Dialog dialogInControl;
 
     private TiledMapTileLayer collisionLayer;
 
@@ -70,6 +77,11 @@ public class FirstScene extends GameScreen {
 
     @Override
     protected void update(float delta) {
+        if (dialogInControl != null) {
+            dialogInControl.update(delta);
+            dialogInControl.updateCamera(stage.getCamera());
+            return;
+        }
         Vector2 oldCamera = new Vector2(stage.getCamera().position.x, stage.getCamera().position.y);
 
         stage.act(delta);
@@ -80,13 +92,13 @@ public class FirstScene extends GameScreen {
 
             // if right hand side, move right
             if (touch.x > stage.getCamera().viewportWidth / 2) {
-                mainCharacter.velocity.x = SCROLL_SPEED;
+                mainCharacter.getVelocity().x = SCROLL_SPEED;
             } else {
-                mainCharacter.velocity.x = -SCROLL_SPEED;
+                mainCharacter.getVelocity().x = -SCROLL_SPEED;
             }
 
         }
-        mainCharacter.velocity.add(0, -GRAVITY * delta);
+        mainCharacter.getVelocity().add(0, -GRAVITY * delta);
         mainCharacter.update(delta, collisionLayer);
         updateCamera(delta);
 
@@ -124,7 +136,10 @@ public class FirstScene extends GameScreen {
     }
 
     protected void renderHud(SpriteBatch batch) {
-
+        if (dialogInControl != null) {
+            dialogInControl.render(batch);
+            return;
+        }
     }
 
     protected void renderScene(SpriteBatch batch, Camera camera) {

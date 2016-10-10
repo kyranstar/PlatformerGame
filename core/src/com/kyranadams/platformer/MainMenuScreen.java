@@ -45,7 +45,7 @@ public class MainMenuScreen extends AbstractScreen {
 
         time += delta;
         if (Gdx.input.justTouched()) {
-            game.setScreen(new FirstScene(game));
+            game.setScreen(new com.kyranadams.platformer.scenes.FirstScene(game));
         }
 
     }
