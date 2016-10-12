@@ -13,6 +13,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.kyranadams.platformer.scenes.dialog.DialogTokenizer.DialogToken;
+import static com.kyranadams.platformer.scenes.dialog.DialogTokenizer.DialogTokenType;
+
 public class Dialog {
 
     private Map<String, Entity> entities;
@@ -27,24 +30,37 @@ public class Dialog {
     public void parseDialog(String[] lines) {
         Parameters p = new Parameters();
         for (String line : lines) {
-            List<DialogTokenizer.DialogToken> tokens = DialogTokenizer.tokenize(line);
-            if (tokens.get(0).type != DialogTokenizer.DialogTokenType.WORD) {
+            List<DialogToken> tokens = DialogTokenizer.tokenize(line);
+            if(tokens.size() == 0) continue;
+            if (tokens.get(0).type != DialogTokenType.WORD) {
                 throw new RuntimeException("Expected command (" + tokens.get(0).string + ") to be word, was " + tokens.get(0).type);
             }
             String command = tokens.get(0).string;
             p.update(tokens);
 
             if (command.equals("speak")) {
-                //speak(p, parameters[0], parameters[parameters.length - 1]);
+                speak(p, tokens.get(0), tokens.get(tokens.size()-1));
             }
         }
     }
 
-    private void speak(Parameters p, String character, String dialog) {
-
+    private void speak(Parameters p, DialogToken character, DialogToken dialog) {
+        if(character.type != DialogTokenType.WORD){
+            throw new DialogParseException("Speak command must act on a character");
+        }
+        if(dialog.type != DialogTokenType.STRING){
+            throw new DialogParseException("Speak command must end with a string");
+        }
+        stage.addAction(Actions.after(Actions.sequence(
+                startDialog(entities.get(character.string)),
+                endDialog()
+        )));
     }
 
     private Action startDialog(Actor actor) {
+        return Actions.sequence();
+    }
+    private Action endDialog(){
         return Actions.sequence();
     }
 
