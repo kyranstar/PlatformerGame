@@ -51,6 +51,10 @@ public class DialogTokenizer {
                 }
             }
         }
+        if (currentType == DialogTokenType.STRING) {
+            throw new DialogTokenizeException("Unfinished string");
+        }
+
         return tokens;
     }
 
@@ -63,8 +67,39 @@ public class DialogTokenizer {
         String string;
 
         public DialogToken(DialogTokenType type, String string) {
+            if (type == null || string == null) {
+                throw new IllegalArgumentException("Arguments can't be null");
+            }
+
             this.type = type;
             this.string = string;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            DialogToken that = (DialogToken) o;
+
+            if (type != that.type) return false;
+            return string.equals(that.string);
+
+        }
+
+        @Override
+        public int hashCode() {
+            int result = type.hashCode();
+            result = 31 * result + string.hashCode();
+            return result;
+        }
+
+        @Override
+        public String toString() {
+            return "DialogToken{" +
+                    "type=" + type +
+                    ", val=" + string +
+                    '}';
         }
     }
 

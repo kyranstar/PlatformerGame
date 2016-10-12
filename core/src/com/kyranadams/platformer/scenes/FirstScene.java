@@ -78,8 +78,8 @@ public class FirstScene extends GameScreen {
     @Override
     protected void update(float delta) {
         if (dialogInControl != null) {
-            dialogInControl.update(delta);
-            dialogInControl.updateCamera(stage.getCamera());
+            //dialogInControl.update(delta);
+            //dialogInControl.updateCamera(stage.getCamera());
             return;
         }
         Vector2 oldCamera = new Vector2(stage.getCamera().position.x, stage.getCamera().position.y);
