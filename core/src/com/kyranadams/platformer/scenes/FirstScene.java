@@ -77,14 +77,12 @@ public class FirstScene extends GameScreen {
 
     @Override
     protected void update(float delta) {
+        stage.act(delta);
         if (dialogInControl != null) {
-            //dialogInControl.update(delta);
-            //dialogInControl.updateCamera(stage.getCamera());
             return;
         }
         Vector2 oldCamera = new Vector2(stage.getCamera().position.x, stage.getCamera().position.y);
 
-        stage.act(delta);
         if (Gdx.input.isTouched()) {
             // scale input to viewport
             Vector3 touch = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);

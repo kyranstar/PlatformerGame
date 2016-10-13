@@ -6,6 +6,7 @@ import com.badlogic.gdx.scenes.scene2d.Action;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.scenes.scene2d.actions.RunnableAction;
 import com.kyranadams.platformer.scenes.entity.Entity;
 
 import java.util.ArrayList;
@@ -19,7 +20,7 @@ import static com.kyranadams.platformer.scenes.dialog.DialogTokenizer.DialogToke
 public class Dialog {
 
     private Map<String, Entity> entities;
-    private Stage stage;
+    private final Stage stage;
 
     public Dialog(String dialogFile, Map<String, Entity> entities, Stage stage) {
         this.entities = entities;
@@ -31,7 +32,7 @@ public class Dialog {
         Parameters p = new Parameters();
         for (String line : lines) {
             List<DialogToken> tokens = DialogTokenizer.tokenize(line);
-            if(tokens.size() == 0) continue;
+            if (tokens.size() == 0) continue;
             if (tokens.get(0).type != DialogTokenType.WORD) {
                 throw new RuntimeException("Expected command (" + tokens.get(0).string + ") to be word, was " + tokens.get(0).type);
             }
@@ -39,16 +40,16 @@ public class Dialog {
             p.update(tokens);
 
             if (command.equals("speak")) {
-                speak(p, tokens.get(0), tokens.get(tokens.size()-1));
+                speak(p, tokens.get(0), tokens.get(tokens.size() - 1));
             }
         }
     }
 
     private void speak(Parameters p, DialogToken character, DialogToken dialog) {
-        if(character.type != DialogTokenType.WORD){
+        if (character.type != DialogTokenType.WORD) {
             throw new DialogParseException("Speak command must act on a character");
         }
-        if(dialog.type != DialogTokenType.STRING){
+        if (dialog.type != DialogTokenType.STRING) {
             throw new DialogParseException("Speak command must end with a string");
         }
         stage.addAction(Actions.after(Actions.sequence(
@@ -58,9 +59,21 @@ public class Dialog {
     }
 
     private Action startDialog(Actor actor) {
-        return Actions.sequence();
+        return Actions.sequence(
+                createAction(new Runnable() {
+                    public void run() {
+                        ;
+                    }
+                })
+        );
     }
-    private Action endDialog(){
+    private Action createAction(Runnable r){
+        RunnableAction ac = new RunnableAction();
+        ac.setRunnable(r);
+        return ac;
+    }
+
+    private Action endDialog() {
         return Actions.sequence();
     }
 
@@ -75,17 +88,17 @@ public class Dialog {
                 DialogTokenizer.DialogToken p = parameterList.get(i);
                 if (p.type == DialogTokenizer.DialogTokenType.COMMA || i == parameterList.size() - 1) {
                     int equalsIndex = -1;
-                    for(int j = 0; j < tokensToComma.size(); j++){
-                        if(tokensToComma.get(j).type == DialogTokenizer.DialogTokenType.EQUALS){
+                    for (int j = 0; j < tokensToComma.size(); j++) {
+                        if (tokensToComma.get(j).type == DialogTokenizer.DialogTokenType.EQUALS) {
                             equalsIndex = j;
                             break;
                         }
                     }
-                    if(equalsIndex != -1){
-                        if(equalsIndex != 1){
+                    if (equalsIndex != -1) {
+                        if (equalsIndex != 1) {
                             throw new RuntimeException("Can only have one argument left of =");
                         }
-                        if(tokensToComma.size() != 3){
+                        if (tokensToComma.size() != 3) {
                             throw new RuntimeException("Can only have one argument right of =");
                         }
                         String varName = tokensToComma.get(0).string;
