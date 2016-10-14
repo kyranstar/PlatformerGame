@@ -7,6 +7,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.actions.RunnableAction;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.kyranadams.platformer.scenes.entity.Entity;
 
 import java.util.ArrayList;
@@ -20,18 +21,28 @@ import static com.kyranadams.platformer.scenes.dialog.DialogTokenizer.DialogToke
 public class Dialog {
 
     private Map<String, Entity> entities;
+    private List<DialogToken>[] lines;
     private final Stage stage;
+    private Label renderText;
+    public boolean isDone;
 
-    public Dialog(String dialogFile, Map<String, Entity> entities, Stage stage) {
+    public Dialog(String dialog, Map<String, Entity> entities, Stage stage) {
         this.entities = entities;
         this.stage = stage;
-        parseDialog(Gdx.files.internal(dialogFile).readString().split("\n"));
+        lexDialog(dialog.split("\n"));
+        renderText = new Label(null, new Label.LabelStyle());
+        renderText.setVisible(false);
+        stage.addActor(renderText);
     }
-
-    public void parseDialog(String[] lines) {
+    private void lexDialog(String[] lines){
+        this.lines = new List[lines.length];
+        for (int i = 0; i < lines.length; i++){
+            this.lines[i] = DialogTokenizer.tokenize(lines[i]);
+        }
+    }
+    public void activate() {
         Parameters p = new Parameters();
-        for (String line : lines) {
-            List<DialogToken> tokens = DialogTokenizer.tokenize(line);
+        for (List<DialogToken> tokens : lines) {
             if (tokens.size() == 0) continue;
             if (tokens.get(0).type != DialogTokenType.WORD) {
                 throw new RuntimeException("Expected command (" + tokens.get(0).string + ") to be word, was " + tokens.get(0).type);
@@ -45,7 +56,7 @@ public class Dialog {
         }
     }
 
-    private void speak(Parameters p, DialogToken character, DialogToken dialog) {
+    private void speak(Parameters p, final DialogToken character, final DialogToken dialog) {
         if (character.type != DialogTokenType.WORD) {
             throw new DialogParseException("Speak command must act on a character");
         }
@@ -54,27 +65,45 @@ public class Dialog {
         }
         stage.addAction(Actions.after(Actions.sequence(
                 startDialog(entities.get(character.string)),
+                createAction(new Runnable(){
+                    public void run(){
+                        renderText.setText(dialog.string);
+                    }
+                }),
                 endDialog()
         )));
     }
 
-    private Action startDialog(Actor actor) {
-        return Actions.sequence(
+    private Action startDialog(final Actor actor) {
+        return Actions.parallel(
                 createAction(new Runnable() {
                     public void run() {
-                        ;
+                        isDone = false;
+                        renderText.setOrigin(actor.getX(), actor.getY());
+                        renderText.setVisible(true);
+                    }
+                }),
+                createAction(new Runnable() {
+                    public void run() {
+                        stage.getViewport().setScreenPosition((int) actor.getX() - stage.getViewport().getScreenWidth(), (int) actor.getY() - stage.getViewport().getScreenWidth());
                     }
                 })
         );
     }
-    private Action createAction(Runnable r){
+
+    private Action createAction(Runnable r) {
         RunnableAction ac = new RunnableAction();
         ac.setRunnable(r);
         return ac;
     }
 
     private Action endDialog() {
-        return Actions.sequence();
+        return Actions.sequence(createAction(new Runnable() {
+            public void run() {
+                isDone = true;
+                renderText.setVisible(false);
+            }
+        }));
     }
 
     private static class Parameters {
