@@ -17,11 +17,15 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
+import com.kyranadams.platformer.CameraController;
 import com.kyranadams.platformer.GameScreen;
 import com.kyranadams.platformer.ParallaxBackground;
 import com.kyranadams.platformer.scenes.dialog.Dialog;
 import com.kyranadams.platformer.scenes.entity.ControllableCharacter;
 import com.kyranadams.platformer.scenes.entity.Entity;
+
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class FirstScene extends GameScreen {
@@ -31,7 +35,7 @@ public class FirstScene extends GameScreen {
     private ParallaxBackground background;
     private TiledMap tiledMap;
     private TiledMapRenderer tiledMapRenderer;
-    private ControllableCharacter mainCharacter = new ControllableCharacter("george.png");
+    private ControllableCharacter mainCharacter = new ControllableCharacter("Niles.png");
     private static final int[] RENDERED_LAYERS = new int[]{0};
     // tilemap size in tiles
     private final int TILEMAP_WIDTH;
@@ -43,6 +47,7 @@ public class FirstScene extends GameScreen {
     private Dialog dialogInControl;
 
     private TiledMapTileLayer collisionLayer;
+    private CameraController cameraController;
 
     public FirstScene(Game game) {
         super(game);
@@ -73,53 +78,40 @@ public class FirstScene extends GameScreen {
             ent.setPosition(rect.getX(), rect.getY());
             stage.addActor(ent);
         }
+        this.cameraController = new CameraController(stage.getCamera(), TILE_WIDTH * TILEMAP_WIDTH, TILE_HEIGHT * TILEMAP_HEIGHT);
+        Map<String, Entity> map = new HashMap<String, Entity>(){{
+            put("niles", mainCharacter);
+        }};
+
+        dialogInControl = new Dialog("speak Niles \"hello\"", map, stage, cameraController);
+        dialogInControl.activate();
     }
 
     @Override
     protected void update(float delta) {
+        Vector2 oldCamera = new Vector2(stage.getCamera().position.x, stage.getCamera().position.y);
         stage.act(delta);
         if (dialogInControl != null && !dialogInControl.isDone) {
+            background.move(new Vector2(stage.getCamera().position.x, stage.getCamera().position.y).sub(oldCamera));
             return;
         }
-        Vector2 oldCamera = new Vector2(stage.getCamera().position.x, stage.getCamera().position.y);
 
         if (Gdx.input.isTouched()) {
-            // scale input to viewport
-            Vector3 touch = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
-            stage.getCamera().unproject(touch);
-
             // if right hand side, move right
-            if (touch.x > stage.getCamera().viewportWidth / 2) {
+            if ((float) Gdx.input.getX() * SCREEN_WIDTH / Gdx.graphics.getWidth() > stage.getCamera().viewportWidth / 2) {
                 mainCharacter.getVelocity().x = SCROLL_SPEED;
             } else {
                 mainCharacter.getVelocity().x = -SCROLL_SPEED;
             }
-
         }
         mainCharacter.getVelocity().add(0, -GRAVITY * delta);
         mainCharacter.update(delta, collisionLayer);
-        updateCamera(delta);
+        cameraController.centerCamera(mainCharacter.getX(), mainCharacter.getY(), delta);
 
         background.move(new Vector2(stage.getCamera().position.x, stage.getCamera().position.y).sub(oldCamera));
     }
 
-    private void updateCamera(float delta) {
-        // camera follows player
-        stage.getCamera().position.set(mainCharacter.getX(), mainCharacter.getY(), 0);
 
-        // Camera borders
-        Vector2 camMin = new Vector2(stage.getCamera().viewportWidth / 2, stage.getCamera().viewportHeight / 2);
-        Vector2 camMax = new Vector2(TILEMAP_WIDTH * TILE_WIDTH - stage.getCamera().viewportWidth / 2, TILEMAP_HEIGHT * TILE_HEIGHT - stage.getCamera().viewportHeight / 2);
-
-        float camX = stage.getCamera().position.x;
-        float camY = stage.getCamera().position.y;
-        //keep camera within borders
-        camX = Math.min(camMax.x, Math.max(camX, camMin.x));
-        camY = Math.min(camMax.y, Math.max(camY, camMin.y));
-
-        stage.getCamera().position.set(camX, camY, stage.getCamera().position.z);
-        stage.getCamera().update();
-    }
 
     @Override
     public void dispose() {

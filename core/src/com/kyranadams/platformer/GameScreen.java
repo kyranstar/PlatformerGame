@@ -13,8 +13,8 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 
 public abstract class GameScreen extends AbstractScreen implements GestureDetector.GestureListener {
 
-    protected static final int SCREEN_WIDTH = 480;
-    protected static final int SCREEN_HEIGHT = 320;
+    protected static final int SCREEN_WIDTH = 240;
+    protected static final int SCREEN_HEIGHT = 160;
     protected static final boolean DISPLAY_FPS = true;
 
     private SpriteBatch batch;

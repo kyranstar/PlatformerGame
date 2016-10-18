@@ -1,6 +1,8 @@
 package com.kyranadams.platformer.scenes.dialog;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Action;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -8,6 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.actions.RunnableAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.kyranadams.platformer.CameraController;
 import com.kyranadams.platformer.scenes.entity.Entity;
 
 import java.util.ArrayList;
@@ -24,15 +27,17 @@ public class Dialog {
     private List<DialogToken>[] lines;
     private final Stage stage;
     private Label renderText;
+    private CameraController cameraController;
     public boolean isDone;
 
-    public Dialog(String dialog, Map<String, Entity> entities, Stage stage) {
+    public Dialog(String dialog, Map<String, Entity> entities, Stage stage, CameraController cameraController) {
         this.entities = entities;
         this.stage = stage;
         lexDialog(dialog.split("\n"));
-        renderText = new Label(null, new Label.LabelStyle());
+        renderText = new Label(null, new Label.LabelStyle(new BitmapFont(), Color.RED));
         renderText.setVisible(false);
         stage.addActor(renderText);
+        this.cameraController = cameraController;
     }
     private void lexDialog(String[] lines){
         this.lines = new List[lines.length];
@@ -51,7 +56,7 @@ public class Dialog {
             p.update(tokens);
 
             if (command.equals("speak")) {
-                speak(p, tokens.get(0), tokens.get(tokens.size() - 1));
+                speak(p, tokens.get(1), tokens.get(tokens.size() - 1));
             }
         }
     }
@@ -63,6 +68,9 @@ public class Dialog {
         if (dialog.type != DialogTokenType.STRING) {
             throw new DialogParseException("Speak command must end with a string");
         }
+        if(!entities.containsKey(character.string)){
+            throw new DialogParseException("Character \"" + character.string + "\" not specified in entities");
+        }
         stage.addAction(Actions.after(Actions.sequence(
                 startDialog(entities.get(character.string)),
                 createAction(new Runnable(){
@@ -70,6 +78,7 @@ public class Dialog {
                         renderText.setText(dialog.string);
                     }
                 }),
+                Actions.delay(2),
                 endDialog()
         )));
     }
@@ -79,13 +88,13 @@ public class Dialog {
                 createAction(new Runnable() {
                     public void run() {
                         isDone = false;
-                        renderText.setOrigin(actor.getX(), actor.getY());
+                        renderText.setPosition(actor.getX(), actor.getY() + actor.getHeight() + renderText.getHeight());
                         renderText.setVisible(true);
                     }
                 }),
                 createAction(new Runnable() {
                     public void run() {
-                        stage.getViewport().setScreenPosition((int) actor.getX() - stage.getViewport().getScreenWidth(), (int) actor.getY() - stage.getViewport().getScreenWidth());
+                        cameraController.centerCamera(actor.getX(), actor.getY(), 1);
                     }
                 })
         );
