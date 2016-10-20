@@ -83,7 +83,7 @@ public class FirstScene extends GameScreen {
             put("niles", mainCharacter);
         }};
 
-        dialogInControl = new Dialog("speak Niles \"hello\"", map, stage, cameraController);
+        dialogInControl = new Dialog(Gdx.files.internal("dialog/scene1/dialog.txt").readString(), map, stage, cameraController);
         dialogInControl.activate();
     }
 
@@ -110,8 +110,6 @@ public class FirstScene extends GameScreen {
 
         background.move(new Vector2(stage.getCamera().position.x, stage.getCamera().position.y).sub(oldCamera));
     }
-
-
 
     @Override
     public void dispose() {

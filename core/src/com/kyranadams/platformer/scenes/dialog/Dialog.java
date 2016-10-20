@@ -2,6 +2,7 @@ package com.kyranadams.platformer.scenes.dialog;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Action;
@@ -34,7 +35,9 @@ public class Dialog {
         this.entities = entities;
         this.stage = stage;
         lexDialog(dialog.split("\n"));
-        renderText = new Label(null, new Label.LabelStyle(new BitmapFont(), Color.RED));
+        BitmapFont font = new BitmapFont(Gdx.files.internal("fonts/munro/munroNarrow.fnt"));
+        font.getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+        renderText = new Label(null, new Label.LabelStyle(font, Color.RED));
         renderText.setVisible(false);
         stage.addActor(renderText);
         this.cameraController = cameraController;
@@ -62,6 +65,8 @@ public class Dialog {
     }
 
     private void speak(Parameters p, final DialogToken character, final DialogToken dialog) {
+        float timeWait = 2;
+        float timePerLetter = .1f;
         if (character.type != DialogTokenType.WORD) {
             throw new DialogParseException("Speak command must act on a character");
         }
@@ -71,14 +76,23 @@ public class Dialog {
         if(!entities.containsKey(character.string)){
             throw new DialogParseException("Character \"" + character.string + "\" not specified in entities");
         }
+        // add each character by itself
+        Action[] textActions = new Action[dialog.string.length() * 2];
+        for(int i = 0; i < dialog.string.length(); i++){
+            final int j = i;
+            textActions[2*i] = createAction(new Runnable() {
+                @Override
+                public void run() {
+                    renderText.getText().append(dialog.string.charAt(j));
+                    renderText.invalidate();
+                }
+            });
+            textActions[2 * i + 1] = Actions.delay(timePerLetter);
+        }
         stage.addAction(Actions.after(Actions.sequence(
                 startDialog(entities.get(character.string)),
-                createAction(new Runnable(){
-                    public void run(){
-                        renderText.setText(dialog.string);
-                    }
-                }),
-                Actions.delay(2),
+                Actions.sequence(textActions),
+                Actions.delay(timeWait),
                 endDialog()
         )));
     }
