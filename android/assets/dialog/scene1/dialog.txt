@@ -1,1 +1,1 @@
-speak niles "Yo wassup fam"
+speak niles, timeAfterSpeech = 2, timePerLetter = 0.1, "Yo wassup fam"
