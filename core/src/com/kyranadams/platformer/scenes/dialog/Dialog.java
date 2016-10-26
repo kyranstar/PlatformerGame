@@ -49,14 +49,14 @@ public class Dialog {
         }
     }
     public void activate() {
-        Parameters p = new Parameters();
+        DialogParameters p = new DialogParameters();
         for (List<DialogToken> tokens : lines) {
             if (tokens.size() == 0) continue;
             if (tokens.get(0).type != DialogTokenType.WORD) {
                 throw new RuntimeException("Expected command (" + tokens.get(0).string + ") to be word, was " + tokens.get(0).type);
             }
             String command = tokens.get(0).string;
-            p.update(tokens);
+            p = p.update(tokens);
 
             if (command.equals("speak")) {
                 speak(p, tokens.get(1), tokens.get(tokens.size() - 1));
@@ -64,9 +64,10 @@ public class Dialog {
         }
     }
 
-    private void speak(Parameters p, final DialogToken character, final DialogToken dialog) {
-        float timeWait = 2;
-        float timePerLetter = .1f;
+    private void speak(DialogParameters p, final DialogToken character, final DialogToken dialog) {
+        float timeWait = Float.valueOf(p.getParameter("timeAfterSpeech"));
+        float timePerLetter = Float.valueOf(p.getParameter("timePerLetter"));
+
         if (character.type != DialogTokenType.WORD) {
             throw new DialogParseException("Speak command must act on a character");
         }
@@ -129,47 +130,5 @@ public class Dialog {
         }));
     }
 
-    private static class Parameters {
-        private Map<String, String> parameters = new HashMap<String, String>();
-
-        public Parameters update(List<DialogTokenizer.DialogToken> parameterList) {
-            Map<String, String> newParameters = new HashMap<String, String>(parameters);
-
-            List<DialogTokenizer.DialogToken> tokensToComma = new ArrayList<DialogTokenizer.DialogToken>();
-            for (int i = 0; i < parameterList.size(); i++) {
-                DialogTokenizer.DialogToken p = parameterList.get(i);
-                if (p.type == DialogTokenizer.DialogTokenType.COMMA || i == parameterList.size() - 1) {
-                    int equalsIndex = -1;
-                    for (int j = 0; j < tokensToComma.size(); j++) {
-                        if (tokensToComma.get(j).type == DialogTokenizer.DialogTokenType.EQUALS) {
-                            equalsIndex = j;
-                            break;
-                        }
-                    }
-                    if (equalsIndex != -1) {
-                        if (equalsIndex != 1) {
-                            throw new RuntimeException("Can only have one argument left of =");
-                        }
-                        if (tokensToComma.size() != 3) {
-                            throw new RuntimeException("Can only have one argument right of =");
-                        }
-                        String varName = tokensToComma.get(0).string;
-                        String paramName = tokensToComma.get(2).string;
-                        newParameters.put(varName.toLowerCase().trim(), paramName.toLowerCase().trim());
-                    }
-                    tokensToComma = new ArrayList<DialogTokenizer.DialogToken>();
-                } else {
-                    tokensToComma.add(p);
-                }
-            }
-            Parameters copy = new Parameters();
-            copy.parameters = newParameters;
-            return copy;
-        }
-    }
-
-    public void render(SpriteBatch batch) {
-
-    }
 
 }

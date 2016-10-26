@@ -25,7 +25,7 @@ public class DialogTokenizer {
                     build += c;
                 }
             } else if (currentType == DialogTokenType.WORD) {
-                if (Character.isLetterOrDigit(c)) {
+                if (Character.isLetterOrDigit(c) || c == '.' || c == '_') {
                     // if continuing a word
                     build += c;
                 } else {
@@ -40,7 +40,7 @@ public class DialogTokenizer {
                 if (c == '"') {
                     // if starting a string
                     currentType = DialogTokenType.STRING;
-                } else if (Character.isLetterOrDigit(c)) {
+                } else if (Character.isLetterOrDigit(c) || c == '.' || c == '_') {
                     // if starting a word
                     currentType = DialogTokenType.WORD;
                     build += c;
@@ -53,6 +53,9 @@ public class DialogTokenizer {
         }
         if (currentType == DialogTokenType.STRING) {
             throw new DialogTokenizeException("Unfinished string");
+        }
+        if(currentType == DialogTokenType.WORD){
+            tokens.add(new DialogToken(DialogTokenType.WORD, build.toLowerCase().trim()));
         }
 
         return tokens;

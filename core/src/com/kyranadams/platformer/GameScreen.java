@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.input.GestureDetector;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 
 public abstract class GameScreen extends AbstractScreen implements GestureDetector.GestureListener {
@@ -20,6 +21,8 @@ public abstract class GameScreen extends AbstractScreen implements GestureDetect
     private SpriteBatch batch;
     protected BitmapFont font;
     protected Stage stage;
+
+    protected static final int SHORT_PRESS_LENGTH_MILLIS = 300;
 
 
     public GameScreen(Game game) {
@@ -54,5 +57,61 @@ public abstract class GameScreen extends AbstractScreen implements GestureDetect
         Gdx.app.debug("Cuboc", "dispose game screen");
         batch.dispose();
         font.dispose();
+    }
+
+    private long timePressed = -1;
+    @Override
+    public boolean touchDown(float x, float y, int pointer, int button) {
+        timePressed = System.currentTimeMillis();
+        return false;
+    }
+
+    @Override
+    public boolean tap(float x, float y, int count, int button) {
+        y *= (float) SCREEN_HEIGHT / Gdx.graphics.getHeight();
+        x *= (float) SCREEN_WIDTH / Gdx.graphics.getWidth();
+
+        if(timePressed > 0 && System.currentTimeMillis() - timePressed < SHORT_PRESS_LENGTH_MILLIS) {
+            shortPress(x, y);
+            timePressed = -1;
+        }
+        return true;
+    }
+    protected abstract void shortPress(float x, float y);
+
+    @Override
+    public boolean longPress(float x, float y) {
+        return false;
+    }
+
+    @Override
+    public boolean fling(float velocityX, float velocityY, int button) {
+        return false;
+    }
+
+
+    @Override
+    public boolean pan(float x, float y, float deltaX, float deltaY) {
+        return false;
+    }
+
+    @Override
+    public boolean zoom(float initialDistance, float distance) {
+        return false;
+    }
+
+    @Override
+    public boolean pinch(Vector2 initialPointer1, Vector2 initialPointer2, Vector2 pointer1, Vector2 pointer2) {
+        return false;
+    }
+
+    @Override
+    public boolean panStop(float x, float y, int pointer, int button) {
+        return false;
+    }
+
+    @Override
+    public void pinchStop() {
+
     }
 }

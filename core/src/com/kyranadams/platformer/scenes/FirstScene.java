@@ -26,6 +26,7 @@ import com.kyranadams.platformer.scenes.entity.Entity;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 
 public class FirstScene extends GameScreen {
@@ -33,38 +34,22 @@ public class FirstScene extends GameScreen {
     private static final float GRAVITY = 200;
 
     private ParallaxBackground background;
-    private TiledMap tiledMap;
-    private TiledMapRenderer tiledMapRenderer;
+    private Tilemap tiledMap;
     private ControllableCharacter mainCharacter = new ControllableCharacter("Niles.png");
-    private static final int[] RENDERED_LAYERS = new int[]{0};
-    // tilemap size in tiles
-    private final int TILEMAP_WIDTH;
-    private final int TILEMAP_HEIGHT;
-    // tile size in pixels
-    private final int TILE_WIDTH;
-    private final int TILE_HEIGHT;
 
     private Dialog dialogInControl;
 
-    private TiledMapTileLayer collisionLayer;
     private CameraController cameraController;
 
     public FirstScene(Game game) {
         super(game);
         // load map
-        tiledMap = new TmxMapLoader().load("sceneOneMap.tmx");
-        tiledMapRenderer = new OrthogonalTiledMapRenderer(tiledMap);
+        tiledMap = new Tilemap(new TmxMapLoader().load("sceneOneMap.tmx"));
 
         // load character position
         Vector2 characterStartPos = ((RectangleMapObject) tiledMap.getLayers().get("Entities").getObjects().get("George")).getRectangle().getPosition(new Vector2());
         mainCharacter.setPosition(characterStartPos.x, characterStartPos.y);
 
-        TILEMAP_WIDTH = tiledMap.getProperties().get("width", Integer.class);
-        TILEMAP_HEIGHT = tiledMap.getProperties().get("height", Integer.class);
-        TILE_WIDTH = tiledMap.getProperties().get("tilewidth", Integer.class);
-        TILE_HEIGHT = tiledMap.getProperties().get("tileheight", Integer.class);
-
-        collisionLayer = ((TiledMapTileLayer) tiledMap.getLayers().get("Collisions"));
 
         this.background = new ParallaxBackground(new Vector2(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2), "space.jpg", .35f);
 
@@ -78,7 +63,7 @@ public class FirstScene extends GameScreen {
             ent.setPosition(rect.getX(), rect.getY());
             stage.addActor(ent);
         }
-        this.cameraController = new CameraController(stage.getCamera(), TILE_WIDTH * TILEMAP_WIDTH, TILE_HEIGHT * TILEMAP_HEIGHT);
+        this.cameraController = new CameraController(stage.getCamera(), tiledMap.pixelWidth(), tiledMap.pixelHeight());
         Map<String, Entity> map = new HashMap<String, Entity>(){{
             put("niles", mainCharacter);
         }};
@@ -105,7 +90,7 @@ public class FirstScene extends GameScreen {
             }
         }
         mainCharacter.getVelocity().add(0, -GRAVITY * delta);
-        mainCharacter.update(delta, collisionLayer);
+        mainCharacter.update(delta, tiledMap.collisionLayer);
         cameraController.centerCamera(mainCharacter.getX(), mainCharacter.getY(), delta);
 
         background.move(new Vector2(stage.getCamera().position.x, stage.getCamera().position.y).sub(oldCamera));
@@ -114,18 +99,17 @@ public class FirstScene extends GameScreen {
     @Override
     public void dispose() {
         mainCharacter.dispose();
+        stage.dispose();
         background.dispose();
     }
 
     protected void renderScene(SpriteBatch batch) {
-        tiledMapRenderer.setView((OrthographicCamera) stage.getCamera());
-        tiledMapRenderer.render(RENDERED_LAYERS);
+        tiledMap.render((OrthographicCamera) stage.getCamera());
         stage.draw();
     }
 
     protected void renderHud(SpriteBatch batch) {
         if (dialogInControl != null) {
-            dialogInControl.render(batch);
             return;
         }
     }
@@ -141,7 +125,6 @@ public class FirstScene extends GameScreen {
         renderScene(batch);
         batch.end();
 
-
         batch.getProjectionMatrix().setToOrtho2D(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
         batch.begin();
         renderHud(batch);
@@ -150,51 +133,9 @@ public class FirstScene extends GameScreen {
         }
         batch.end();
     }
-
     @Override
-    public boolean touchDown(float x, float y, int pointer, int button) {
-        return false;
+    protected void shortPress(float x, float y){
+
     }
 
-    @Override
-    public boolean tap(float x, float y, int count, int button) {
-        return false;
-    }
-
-    @Override
-    public boolean longPress(float x, float y) {
-
-        return false;
-    }
-
-    @Override
-    public boolean fling(float velocityX, float velocityY, int button) {
-        return false;
-    }
-
-
-    @Override
-    public boolean pan(float x, float y, float deltaX, float deltaY) {
-        return false;
-    }
-
-    @Override
-    public boolean zoom(float initialDistance, float distance) {
-        return false;
-    }
-
-    @Override
-    public boolean pinch(Vector2 initialPointer1, Vector2 initialPointer2, Vector2 pointer1, Vector2 pointer2) {
-        return false;
-    }
-
-    @Override
-    public boolean panStop(float x, float y, int pointer, int button) {
-        return false;
-    }
-
-    @Override
-    public void pinchStop() {
-
-    }
 }
